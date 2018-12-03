@@ -1,4 +1,7 @@
 <?php
+use think\Db;
+use think\Debug;
+
   //获得参数 signature nonce token timestamp echostr
     $nonce     = $_GET['nonce'];
     $token     = '123456';
@@ -70,23 +73,32 @@
                 $fromUser = $postObj->ToUserName;
                 $time     = time();
                 $msgType  = 'text';
-                $content  = mb_substr($content,0,-2,"UTF-8");
+                $cityname  = mb_substr($content,0,-2,"UTF-8");
+ 
 
-          	//	$city = array("北京", "上海", "廣州");
-				$city = array("01" => "北京", "02" => "上海","03" => "天津","04" => "重庆","05" => "黑龙江","06" => "吉林",
-                               "07" => "辽宁","08" => "内蒙古","09" => "河北","10" => "山西","11" => "陕西","12" => "山东",
-                               "13" => "新疆","14" => "西藏","15" => "青海","16" => "甘肃","17" => "宁夏","18" => "河南",
-                               "19" => "江苏","20" => "湖北","21" => "浙江","22" => "安徽","23" => "福建","24" => "江西",
-                               "25" => "湖南","26" => "贵州","27" => "四川","28" => "广东","29" => "云南","30" => "广西",
-                               "31" => "海南","32" => "香港","33" => "澳门","34" => "台湾");
+     
+     	
+          		//$city_info_api='http://211.159.146.11/weather/'.
+               //$city_code_api='http://211.159.146.11/city/北京'
+          
+         
+          
+    /*      	include("weather_cityId.php");
+        
+          		foreach ($weather_cityId as $k=>$v) {	//$k是城市名,$v為該城市之天氣編碼
+               	if($cityname == $k)
+                { 
+                
+        		}
+    												}  */
+                  
+                $cityapi = file_get_contents('http://211.159.146.11/city/'.$cityname);  //傳入使用者輸入的城市名$cityname,透過city_api取得城市編碼
+         		$citycode = json_decode($cityapi)->citycode;  //將取得的內容轉換為json格式,拿取其中citycode欄位裡面的內容(實際的城市編碼)
+          
+                $json = file_get_contents('http://211.159.146.11/weather/'.$citycode);	//將取得的城市編碼傳入weather_api,取得該地天氣信息
+ 				
+                $content =json_decode($json);	//將內容轉換為json格式
 
-          		foreach ($city as $value) {
-               	if($content == $value)
-                {
-  					$content = $content."地区的天气状况为雾转浮尘:\n气温:-3~-9℃\t风向:东北风\t风力:微风\t气压:1023.9hPa\t相对湿度:18%\t降雨机率:6%";
-                }
-                }
-				
                 $template = "<xml>
                                 <ToUserName><![CDATA[%s]]></ToUserName>
                                 <FromUserName><![CDATA[%s]]></FromUserName>
@@ -102,3 +114,4 @@
         }
 
     }
+
